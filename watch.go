@@ -1,5 +1,5 @@
 package main
 
-func watch() {
-    // loop forever watching addresses in queue
+func Watch() {
+    // loop forever watching database for new events
 }
