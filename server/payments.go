@@ -1,4 +1,4 @@
-package main
+package server
 
 func report() {
     // TODO for every billable thing, log it for auditing

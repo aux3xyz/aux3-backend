@@ -6,7 +6,7 @@ import (
     "github.com/spf13/cobra"
 )
 
-var serverCmd = &cobra.Command{
+var servercmd = &cobra.Command{
     Use: "server",
     Short: "start server to listen",
     Long: `Hit Ctrl+D to exit, will run until terminated`,

@@ -1,4 +1,4 @@
-package main
+package server
 
 func Process() {
     // TODO called when event is seen 
@@ -10,4 +10,5 @@ func decrypt() string {
     // TODO load private key
     // TODO decrypt config
     // TODO return decrypted secrets
+    return ""
 }

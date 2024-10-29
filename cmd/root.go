@@ -5,7 +5,7 @@ import (
 )
 
 var (
-    rootCmd = &cobra.Command{
+    rootcmd = &cobra.Command{
         Use: "aux3-server",
         Short: "Listen for EVM events and perform actions",
         Long: `Subscribe to events by publishing to a smart contract and funding.
@@ -15,9 +15,10 @@ var (
 )
 
 func Execute() error {
-    return rootCmd.Execute()
+    return rootcmd.Execute()
 }
 
 func init() {
-    rootCmd.AddCommand(serverCmd)
+    rootcmd.AddCommand(servercmd)
+    rootcmd.AddCommand(toolscmd)
 }
