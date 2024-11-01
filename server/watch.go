@@ -11,28 +11,39 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	dbName         = "aux3"
+	collectionName = "events"
+	retryDelay     = time.Second
+)
+
 func Watch() error {
-	// Get the shared MongoDB client
 	client := common.GetMongoClient()
 	ctx := context.Background()
 
-	// Get collection to watch
-	// TODO: setup right database and collection names
-	collection := client.Database("aux3").Collection("events")
-
-	// Set up change stream
-	pipeline := mongo.Pipeline{}
+	collection := client.Database(dbName).Collection(collectionName)
 	opts := options.ChangeStream().SetFullDocument(options.UpdateLookup)
 
-	// Start watching for changes
-	changeStream, err := collection.Watch(ctx, pipeline, opts)
-	if err != nil {
-		log.Printf("Failed to start change stream: %v", err)
-		return err
+	for {
+		changeStream, err := collection.Watch(ctx, mongo.Pipeline{}, opts)
+		if err != nil {
+			log.Printf("Failed to start change stream: %v", err)
+			time.Sleep(retryDelay)
+			continue
+		}
+
+		if err := watchChanges(ctx, changeStream); err != nil {
+			log.Printf("Change stream error: %v", err)
+			changeStream.Close(ctx)
+			time.Sleep(retryDelay)
+			continue
+		}
 	}
+}
+
+func watchChanges(ctx context.Context, changeStream *mongo.ChangeStream) error {
 	defer changeStream.Close(ctx)
 
-	// Loop forever watching for changes
 	for changeStream.Next(ctx) {
 		var event bson.M
 		if err := changeStream.Decode(&event); err != nil {
@@ -40,15 +51,10 @@ func Watch() error {
 			continue
 		}
 
-		// Send event to process
-		// TODO: Setup Process function
-		go Process()
+		go Process() // TODO: Setup Process function; pass decoded event?
 
-		// Error handling with reconnection
 		if err := changeStream.Err(); err != nil {
-			log.Printf("Error in change stream: %v", err)
-			time.Sleep(1 * time.Second)
-			return Watch() // Recursive call to restart watching
+			return err
 		}
 	}
 
